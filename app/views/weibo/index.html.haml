@@ -8,7 +8,7 @@
     %span
       =link_to "微博信息统计", "/weibo/stats"
   .page-weibo-account
-    = image_tag("#{@weibo_user['avatar_large']}")
+    = image_tag(@weibo_user['avatar_large'])
     = @weibo_user['screen_name']
 
     = form_tag '/weibo', :method => 'create' do

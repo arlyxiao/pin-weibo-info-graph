@@ -16,29 +16,28 @@ class WeiboStatus < ActiveRecord::Base
   def self.get_weibo_statuses(user, screen_name, count)
     client = user.get_weibo_client
 
-    user_weibo = client.statuses.user_timeline({:screen_name => screen_name}).parsed
-    weibo_statuses = user_weibo['statuses']
-
-    # 如果用户输入的查询数量超过 20, 并且第一次查询结果也等于20, 说明用户的微博至少超过20
-    if count > 20 && weibo_statuses.length == 20
-      api_count = count / 20
-
-      api_count.times do |i|
-        user_weibo = client.statuses.user_timeline({:screen_name => screen_name, :page => i + 1}).parsed
-        
-        # 数组查询合并
-        weibo_statuses =  weibo_statuses + user_weibo['statuses']
-      end
-
-      # 如果查询结果数量大于用户输入的数值， 则数组长度取用户输入的数值
-      if weibo_statuses.length > count
-        count = count - 1
-        weibo_statuses = weibo_statuses[0..count]
-      end
+    if count <= 20
+      user_weibo = client.statuses.user_timeline(:screen_name => screen_name, :page => 1, :count => count).parsed
+      return user_weibo['statuses']
     end
 
-    weibo_statuses
+    weibo_statuses = []
+    current_page = 1
+    while true do
+      user_weibo = client.statuses.user_timeline(:screen_name => screen_name, :page => current_page, :count => 20).parsed
+      single_weibo_statuses = user_weibo['statuses']
+      break if single_weibo_statuses.nil?
 
+      if weibo_statuses.count + single_weibo_statuses.count < count
+        weibo_statuses += single_weibo_statuses
+        current_page += 1
+      else
+        index = count - weibo_statuses.count
+        weibo_statuses += single_weibo_statuses[0...index]
+        break
+      end
+    end
+    weibo_statuses
   end
   # end get_weibo_statuses
 
