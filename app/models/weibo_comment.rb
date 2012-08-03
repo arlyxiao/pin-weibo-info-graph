@@ -27,34 +27,6 @@ class WeiboComment < ActiveRecord::Base
   end
   # end of update_by_weibo_status_id
 
-
-  def self.get_my_comments_by_count(client_user, count)
-    client = client_user.get_weibo_client
-
-    current_page = 1
-    if count <= 20
-      response = client.comments.by_me(:page => current_page, :count => count).parsed
-      comments = response['comments']
-    else
-      comments = []
-      while true do
-        response = client.comments.by_me(:page => current_page, :count => 20).parsed
-        if comments.count + response['comments'].count < count
-          comments = comments + response['comments']
-          current_page += 1
-        else
-          index = count - comments.count
-          comments += response['comments'][0...index]
-          break
-        end
-      end
-    end
-
-    comments
-  end
-  # end of get_my_comments_by_count
-
-
   def self.save_comments(comments)
     unless comments.nil?
       comments.each do |comment|

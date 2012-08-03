@@ -5,11 +5,36 @@ class UserWeiboAuth < ActiveRecord::Base
            :class_name => 'WeiboComment', :order => 'created_at',
            :foreign_key => :weibo_user_id, :primary_key => :weibo_user_id
 
+  def weibo_client
+    Weibo2::Client.from_hash(:access_token => self.token, :expires_in => self.expires_in)
+  end
 
   has_one :weibo_user, :class_name => 'WeiboUser', 
           :foreign_key => :weibo_user_id, :primary_key => :weibo_user_id
+  def get_my_comments_by_count(count)
+    client = self.weibo_client
 
+    current_page = 1
+    if count <= 20
+      response = client.comments.by_me(:page => current_page, :count => count).parsed
+      comments = response['comments']
+    else
+      comments = []
+      while true do
+        response = client.comments.by_me(:page => current_page, :count => 20).parsed
+        if comments.count + response['comments'].count < count
+          comments = comments + response['comments']
+          current_page += 1
+        else
+          index = count - comments.count
+          comments += response['comments'][0...index]
+          break
+        end
+      end
+    end
 
+    comments
+  end
 
   def group_comments_by_week
     week_comments = []
@@ -110,10 +135,7 @@ class UserWeiboAuth < ActiveRecord::Base
 
       # begin get_weibo_client
       def get_weibo_client
-        token = self.weibo_auth.token
-        expires_in = self.weibo_auth.expires_in
-
-        Weibo2::Client.from_hash(:access_token => token, :expires_in => expires_in)
+        self.weibo_auth.weibo_client
       end
       # end get_weibo_client
 

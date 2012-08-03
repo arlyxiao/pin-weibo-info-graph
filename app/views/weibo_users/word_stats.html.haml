@@ -3,7 +3,15 @@
 - hbreadcrumb '分词统计', '#'
 
 .page-weibo-word-stats
+  .head
+    .rule
+      .desc 过滤规则：
+      .desc 1. 滤去了数百个 STOP_WORDS 一般是助词，介词等
+      .desc 2. 滤去了 http://xxxx 这样的各种网址
+      .desc 3. 滤去了所有 @其他人
+      .desc 4. 滤去了所有单字符词
+
   - @top_20_words.each do |word|
     .word-stat
-      .word{:style=>'margin-right:20px;'}= word[0]
-      .stat{:style=>'color:#ffd75f'}= word[1]
+      .word= word[0]
+      .stat= word[1]

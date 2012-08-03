@@ -2,10 +2,10 @@
 - hbreadcrumb "我发出的评论", '#'
 
 .page-weibo-comments-query
-  = form_tag '/weibo_comments/by_me', :method => 'get' do
+  = form_tag '/weibo_comments/by_me_submit', :method => 'post' do
     .field
       %label= "评论数量"
-      = text_field_tag 'count', @count
+      = text_field_tag 'count'
 
     .field.submit
       %a.form-submit-button{:href=>'javascript:;'} 采集

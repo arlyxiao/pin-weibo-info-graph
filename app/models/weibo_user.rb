@@ -13,9 +13,8 @@ class WeiboUser < ActiveRecord::Base
   validates_uniqueness_of :weibo_user_id
 
   STOP_WORDS = begin
-    arr = []
     file = File.new File.expand_path(Rails.root.to_s + '/lib/stopwords.txt')
-    file.read.split("\r\n")
+    file.read.split("\r\n") - ['']
   end
 
   def word_stats
@@ -24,20 +23,29 @@ class WeiboUser < ActiveRecord::Base
 
     statuses.each do |status|
 
-      algor = RMMSeg::Algorithm.new(status.text)
+      algor = RMMSeg::Algorithm.new(_prepate_text(status.text))
     
       loop do
         tok = algor.next_token
         break if tok.nil?
-        words[tok.text] = words[tok.text] + 1 unless STOP_WORDS.include?(tok.text)
 
+        word = tok.text
+        if !STOP_WORDS.include?(word) && word.split(//u).length > 1
+          words[word] = words[word] + 1
+        end
       end
     end
 
     words
   end
-  # end of word_stats
 
+  def _prepate_text(status_text)
+    s1 = status_text.gsub /@\S+/, ''
+    # s2 = s1.gsub /http:\/\/t.cn\/\S+/, ''
+    s2 = s1.gsub /http:\/\/\S+/, ''
+  end
+
+  # -----------
   
   def get_all_comments(client_user)
     client = client_user.get_weibo_client

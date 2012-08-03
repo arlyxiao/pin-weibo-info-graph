@@ -38,6 +38,9 @@
 }
 
 .page-weibo-word-stats{
+  .head{
+    margin-bottom:20px;
+  }
   .word-stat{
     @include floatfix;
     font-size:16px;
@@ -45,7 +48,7 @@
       float:left;width:100px;
     }
     .stat{
-      float:left;
+      float:left;color:#ffd75f;
     }
   }
 }
